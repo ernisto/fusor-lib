@@ -27,9 +27,10 @@ return function()
             Computed(scope, function(use)
                 
                 local pos = use(key)
-                if firstUpdate then firstUpdate = false; return end
+                if firstUpdate then firstUpdate = false; return nil end
                 
                 print(`{name}#{id} moved to {pos}`)
+                return
             end)
             print('new', name, '#', id)
             table.insert(scope, function() print('bye', name, '#', id) end)

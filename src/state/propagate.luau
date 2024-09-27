@@ -6,7 +6,7 @@ local function outdateAll(self: state.State)
     self.updated = false
     if self.isUpdated then self.isUpdated:set(false) end
 
-    for state in self.listeners do
+    for state in self.listeners :: any do
     
         state.updated = false
         if state.isUpdated then state.isUpdated:set(false) end

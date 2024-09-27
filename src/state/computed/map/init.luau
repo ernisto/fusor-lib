@@ -1,5 +1,4 @@
 --!nolint LocalShadow
---!strict
 
 local package = script.Parent.Parent.Parent
 local propagate = require(package.state.propagate)

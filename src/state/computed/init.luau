@@ -29,9 +29,12 @@ function Computed.new<Value, Derived>(
     return self
 end
 function Computed.get<Value>(self: Computed<Value>, possiblyBusy: 'possiblyBusy'): Value
-    if self.busy then warn(`attempt to read a Computed() value while is busy (if it is proposital, pls use 'possiblyBusy' flag)`) end
+    if self.busy then
+        warn(`attempt to read a Computed() value while is busy (if it is proposital, pls use 'possiblyBusy' flag)`)
+        return self.value
+    end
     if self.updated then return self.value end
-    return update(self)
+    return update(self) :: any
 end
 
 function destroy(self: Computed)
@@ -71,8 +74,8 @@ function update<Value, Derived>(self: Computed<Value, Derived>)
 
         if stateListeners[self] ~= update then
 
-            table.insert(newDepending, stateListeners)
-            stateListeners[self] = update
+            table.insert(newDepending, stateListeners :: any)
+            stateListeners[self] = update :: any
             
             if self.watchedPriority and state.watchedPriority then
                 self.watchedPriority:set(math.max(self.watchedPriority.value, 1 + state.watchedPriority.value))

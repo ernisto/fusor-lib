@@ -58,12 +58,12 @@ function scope.derivable(root: _scope,...): _scope
         local cached = cache[data]
         if cached then out = cached; continue end
 
-        out = table.clone(out)
+        out = table.clone(out) :: any
         for index, value in data do out[index] = value end
 
-        out.__cachedMerges = setmetatable({}, { __mode = 'k' })
+        out.__cachedMerges = setmetatable({}, { __mode = 'k' }) :: any
         out.__index = out
-        cache[data] = table.freeze(setmetatable(out, root))
+        cache[data] = table.freeze(setmetatable(out, root)) :: any
     end
     return out
 end

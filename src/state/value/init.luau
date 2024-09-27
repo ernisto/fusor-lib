@@ -1,4 +1,3 @@
---!strict
 local package = script.Parent.Parent
 local propagate = require(package.state.propagate)
 local scope = require(package.memory.scope)

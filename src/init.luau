@@ -1,4 +1,3 @@
---!strict
 local package = script
 local isSimilar = require(package.utils.isSimilar)
 
