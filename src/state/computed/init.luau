@@ -28,7 +28,8 @@ function Computed.new<Value, Derived>(
     
     return self
 end
-function Computed.get<Value>(self: Computed<Value>): Value
+function Computed.get<Value>(self: Computed<Value>, possiblyBusy: 'possiblyBusy'): Value
+    if self.busy then warn(`attempt to read a Computed() value while is busy (if it is proposital, pls use 'possiblyBusy' flag)`) end
     if self.updated then return self.value end
     return update(self)
 end
@@ -63,7 +64,7 @@ function update<Value, Derived>(self: Computed<Value, Derived>)
         if stateListeners == nil then return state :: any end -- isnt a state
 
         if not possiblyDead and state.parent == nil then
-            error(`attempt to read a dead state (if its was proposital, pls use 'possiblyDead' flag)`)
+            error(`attempt to read a dead state (if it is proposital, pls use 'possiblyDead' flag)`)
         end
 
         local value = state:get()

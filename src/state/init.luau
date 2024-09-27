@@ -29,6 +29,8 @@ export type ConsumerState<Value = any, Derived = {}, extra = {}>
     = State<Value, Derived, extra & {
         listening: { listeners<Value> },
         busy: boolean,
+
+        get: (_State<Value>, possiblyBusy: 'possiblyBusy') -> Value,
     }>
 
 local function is(self: unknown): State?

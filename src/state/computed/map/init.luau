@@ -51,11 +51,12 @@ function Map.new<IK, IV, OK, OV, D>(
 end
 
 --// Methods
-function Map.get<OK, OV>(self: Map<unknown, unknown, OK, OV>): { [OK]: OV }
-    if not self.updated then update(self) end
+function Map.get<OK, OV>(self: Map<unknown, unknown, OK, OV>, possiblyBusy: 'possiblyBusy'): { [OK]: OV }
+    if self.busy then warn(`attempt to read a Map() value while is busy (if it is proposital, pls use 'possiblyBusy' flag)`) end
     return update(self)
 end
-function Map.getKey<OK, OV>(self: Map<unknown, unknown, OK, OV>, key: OK): OV
+function Map.getKey<OK, OV>(self: Map<unknown, unknown, OK, OV>, key: OK, possiblyBusy: 'possiblyBusy'): OV
+    if self.busy then warn(`attempt to read a Map() value while is busy (if it is proposital, pls use 'possiblyBusy' flag)`) end
     return self.value[key]
 end
 
