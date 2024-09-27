@@ -1,6 +1,6 @@
 --!strict
 local package = script
-local isSimilar = require(package.isSimilar)
+local isSimilar = require(package.utils.isSimilar)
 
 local state = require(package.state)
 local Value = require(package.state.value)

@@ -7,6 +7,7 @@ local Computed = require(package.state.computed)
 local Value = require(package.state.value)
 local Scope = require(package.memory.scope)
 local State = require(package.state)
+local isSimilar = require(package.utils.isSimilar)
 
 local NOT_USING_KEY = newproxy(true)
 

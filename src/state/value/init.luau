@@ -3,7 +3,7 @@ local package = script.Parent.Parent
 local propagate = require(package.state.propagate)
 local scope = require(package.memory.scope)
 local state = require(package.state)
-local isSimilar = require(package.isSimilar)
+local isSimilar = require(package.utils.isSimilar)
 
 local Value = {}
 
