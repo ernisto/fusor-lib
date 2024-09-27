@@ -1,0 +1,3 @@
+collapse_simple_statement = 'Always'
+call_parentheses = 'Input'
+quote_style = 'AutoPreferSingle'

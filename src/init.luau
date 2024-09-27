@@ -16,12 +16,12 @@ export type UsedAs<Value = any> = state.UsedAs<Value>
 
 export type Scope<Derived = {}, Fields = {}> = Scope.scope<Derived, Fields>
 
-return Scope:derivable{
-    State = state,
-    Value = Value,
-    Computed = Computed,
-    Map = Map,
+return Scope:derivable {
+	State = state,
+	Value = Value,
+	Computed = Computed,
+	Map = Map,
 
-    whichIsParent = whichIsParent,
-    isSimilar,
+	whichIsParent = whichIsParent,
+	isSimilar,
 }

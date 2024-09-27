@@ -1,5 +1,3 @@
-local function never(): never
-    error(`unreachable code`)
-end
+local function never(): never error(`unreachable code`) end
 
 return never
