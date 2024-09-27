@@ -8,8 +8,9 @@ local Value = require(package.state.value)
 local Scope = require(package.memory.scope)
 local State = require(package.state)
 local isSimilar = require(package.utils.isSimilar)
+local never = require(package.utils.never)
 
-local NOT_USING_KEY = newproxy(true)
+local SAME = newproxy(true)
 
 --// Module
 local Map = {}
@@ -22,13 +23,13 @@ function Map.new<IK, IV, OK, OV, D>(
     pairComputer: pairComputer<IK, IV, OK, OV, D>
 ): Map<IK, IV, OK, OV, D>
 
-    local subjectAsState, alreadyIsState = State.cast(parent, subject)
+    local subjectAsState = State.is(subject)
 
     local self: Map<IK, IV, OK, OV, D> = parent:child({
-        updated = true,
+        updated = false,
         busy = false,
 
-        listening = { subjectAsState.listeners },
+        listening = { subjectAsState },
         listeners = {},
         value = {},
 
@@ -36,115 +37,123 @@ function Map.new<IK, IV, OK, OV, D>(
         processors = {},
 
         subject = subjectAsState,
-        removingOutPairs = {},
         pairComputer = pairComputer,
 
         getKey = Map.getKey,
         get = Map.get,
     } :: any)
 
-    update(self)
-
-    if alreadyIsState then
-
+    if subjectAsState then
         subjectAsState.listeners[self] = update :: any
-        propagate.updateAll(self)
     end
-
+    update(self)
     return self
 end
 
 --// Methods
 function Map.get<OK, OV>(self: Map<unknown, unknown, OK, OV>): { [OK]: OV }
     if not self.updated then update(self) end
-    return self.value
+    return update(self)
 end
 function Map.getKey<OK, OV>(self: Map<unknown, unknown, OK, OV>, key: OK): OV
     return self.value[key]
 end
 
-function update<IK, IV, OK, OV>(self: Map<IK, IV, OK, OV>, updateId: number?, nextMutations: { { [State.State]: any }}?, deltaKeys: { [IK]: IV }?)
+function update<IK, IV, OK, OV>(self: Map<IK, IV, OK, OV>, updateId: number?, nextMutations: { { [State.State]: any }}?, deltaKeys: { [IK]: IV }?): { [OK]: OV }
 
     type myProcessor = processor<IK, IV, OK, OV>
-
-    local newValue = self.subject.value
+    type listenable = { listeners: { [any]: (any) -> () } }
     local output = self.value
 
-    local pairComputer = self.pairComputer
-    local freeProcessors = self.freeProcessors
+    if self.updated then return output end
+    if self.busy then return output end
+    self.busy = true
+
     local processors = self.processors
+    local freeProcessors = self.freeProcessors
+    local outdatedStates = {} :: { listenable }
+    local pairComputer = self.pairComputer
 
-    local remainingPairs = table.clone(newValue)
+    local updateId = outdatedStates   -- just something that is unique for each `update` callment
 
-    local removingOutPairs = table.clone(output)
-    self.removingOutPairs = removingOutPairs
+    -- update all `processors` that is kept by some key or value
+    -- queue all updates in `outdatedStates` for batched update
+    -- keep `unprocessedPairs` only with pairs that wasnt processed here by an existing processor
+    local unprocessedPairs = table.clone(State.get(self.subject))
+    for _,processor in processors do
 
-    -- update all processors that is kept by some key or value
-    for processor, usingKey in processors do    -- im storing usingKey here (faster than .usingKey) bcuz is the most common case
+        local usingKey = processor.usingKey
+        if usingKey ~= nil then
 
-        -- local usingKey = processor.usingKey
-        if usingKey ~= NOT_USING_KEY then
-
-            local value = remainingPairs[usingKey]
+            local value = unprocessedPairs[usingKey]
             if value ~= nil then
 
-                remainingPairs[usingKey] = nil
-                processor.value:set(value)
-
+                local valueState = processor.value
+                if not isSimilar(valueState.value, value) then
+                    table.insert(outdatedStates, valueState)
+                    propagate.outdateAll(valueState :: any)
+                    valueState.value = value
+                end
                 continue
             end
+            unprocessedPairs[usingKey] = nil
         end
 
         local usingValue = processor.usingValue
         if usingValue ~= nil then
-            
+
             local found = false
-            for index, value in remainingPairs do
+            for key, value in unprocessedPairs do
 
                 if value ~= usingValue then continue end
 
-                remainingPairs[index] = nil
-                processor.key:set(index)
-
-                local outKey = processor.outKey
-                if outKey then removingOutPairs[outKey] = nil end
-
+                local keyState = processor.key
+                if not isSimilar(keyState.value, key) then
+                    table.insert(outdatedStates, keyState :: any)
+                    propagate.outdateAll(keyState :: any)
+                    keyState.value = key
+                end
+                unprocessedPairs[key] = nil
                 found = true
                 break
             end
             if found then continue end
         end
-
         table.insert(freeProcessors, processor :: any)
     end
-    -- reuse or create processors for new pairs
-    for key, value in remainingPairs do
 
-        local processor = table.remove(freeProcessors) :: myProcessor
+    -- reuse unused processors to process remaining pairs
+    -- if no more available unused processors, create new for the remaining pairs
+    for key, value in unprocessedPairs do
+
+        local processor: myProcessor? = table.remove(freeProcessors)
         if processor then   -- reuse existing free processor
+            local keyState = processor.key
+            local valueState = processor.value
 
-            -- processor.usingKey = nil
-            processor.usingValue = nil
-
-            processor.value.value = value
-            processor.key.value = key
-            processor.outPair.updated = false
-            processor.syncOutput:get()
+            if not isSimilar(keyState.value, key) then
+                keyState.value = key
+                propagate.outdateAll(keyState)
+            end
+            if not isSimilar(valueState.value, value) then
+                valueState.value = value
+                propagate.outdateAll(valueState)
+            end
         else    -- create new processor
-
             local keyState = Value(self, key)
             local valueState = Value(self, value)
-            local processor: myProcessor = {
+            processor = {
                 key = keyState, value = valueState,
-                outPair = {}, syncOutput = nil,
-                usingValue = nil , -- usingKey = nil,
-                outKey = nil,
+                outPair = {},
+                usingKey = nil, usingValue = nil,
+                listeners = {}, updated = false,
             } :: any
+            assert(processor)
 
             local function keepBy<C>(state: State.State<C>): C
 
                 local consumed = state.value :: any
-                if state == keyState then processors[processor] = consumed
+                if state == keyState then processor.usingKey = consumed
                 elseif state == valueState then processor.usingValue = consumed
                 else error(`invalid state (must to be the received state for key or value)`)
                 end
@@ -152,59 +161,109 @@ function update<IK, IV, OK, OV>(self: Map<IK, IV, OK, OV>, updateId: number?, ne
             end
             local outPair = Computed(self, function(use, inner)
 
-                processors[processor] = NOT_USING_KEY
+                processor.usingKey = nil
                 processor.usingValue = nil
+
+                if keyState.value == nil then return {} end
 
                 local r = table.pack(xpcall(pairComputer, debug.traceback, use, inner, keyState, valueState, keepBy))
                 if not r[1] then warn(r[2]); return { 0 :: any } end
+
                 local l = r.n
-
-                return if l == 1 then { 0 }
-                    elseif l == 2 then { 1, nil :: any, r[2] :: any }
-                    else { 2, r[2] :: any, r[3] :: any }
+                return if l == 1 then  { SAME, SAME }
+                    elseif l == 2 then { SAME, r[2] }
+                    else               { r[2], r[3] }
             end)
-            processor.outPair = outPair :: any
-            processor.syncOutput = Computed(self, function(use)
 
-                local outPair = use(outPair)
-                local l, key, value = outPair[1], outPair[2], outPair[3]
+            local lastKey
+            local lastValue
+            local busy = false
+            local function syncOutput()
 
-                if l == 0 and value == nil then value = use(valueState) end
-                if l ~= 2 and key == nil then key = use(keyState) end
+                if processor.updated or busy then return end
+                processor.updated = true
+                busy = true
 
-                processor.outKey = key
-                if key == nil then return nil end
+                local outPair = processor.outPair:get()
+                local outKey = outPair[1] :: OK
+                local outValue = outPair[2] :: OV
 
-                self.removingOutPairs[key] = nil
-                output[key] = value
+                -- solve special outputs
+                if outKey == SAME then
+                    keyState.listeners[processor] = syncOutput
+                    outKey = keyState.value :: any
+                else
+                    keyState.listeners[processor] = nil :: any
+                end
+                if outValue == SAME then
+                    valueState.listeners[processor] = syncOutput
+                    outValue = valueState.value :: any
+                else
+                    valueState.listeners[processor] = nil :: any
+                end
 
-                return nil
-            end)
+                -- update processors and output
+                local valueChanged = not isSimilar(outValue, lastValue)
+                local keyChanged = not isSimilar(outKey, lastKey)
+
+                if keyChanged and lastKey ~= nil and processors[lastKey] == processor then
+                    processors[lastKey] = nil
+                    output[lastKey] = nil
+                end
+                if outKey ~= nil then
+                    if keyChanged then processors[outKey] = processor end
+                    if not keyChanged and not valueChanged then return end
+                    output[outKey] = outValue
+                end
+                lastValue = outValue
+                lastKey = outKey
+                busy = false
+                
+                -- update listeners if 
+                if self.busy then
+                    self.lastOutputChange = updateId
+                    return
+                end
+                propagate.outdateAll(self)
+                propagate.updateAll(self)
+            end
+            processor.listeners[processor] = syncOutput
+            outPair.listeners[processor] = syncOutput
+            processor.outPair = outPair
         end
+        table.insert(outdatedStates, processor or never())
     end
-    -- clear free processors
+
+    -- clear free processors (happens when more keys has removed over added)
     for _,freeProcessor in freeProcessors do
-
         freeProcessor.key.value = nil
-        if freeProcessor.outPair.lastComputation then freeProcessor.outPair.lastComputation:destroy() end
+        freeProcessor.outPair:get()
     end
-    -- remove old out pairs
-    for index in removingOutPairs do
-        output[index] = nil
-    end
-    table.clear(removingOutPairs)
 
-    propagate.updateAll(self)
+    -- bulk update all `outdatedStates`, and sync all `outPair` to `output`
+    for _,listenable in outdatedStates do
+        for object, update in listenable.listeners do update(object) end
+    end
+
+    -- end
+    self.updated = true
+    self.busy = false
+
+    if self.lastOutputChange == updateId then
+        propagate.outdateAll(self)
+        propagate.updateAll(self)
+    end
+    return output
 end
 
 --// Types
 export type Map<IK = any, IV = any, OK = IK, OV = IV, D = {}, processor = processor<IK, IV, OK, OV>> = State.ConsumerState<{ [OK]: OV }, D, {
     pairComputer: pairComputer<IK, IV, OK, OV, D>,
-    removingOutPairs: { [OK]: any },
     freeProcessors: { processor },
-    processors:{ [processor]: IK },
+    processors: { [OK]: processor },
     subject: State.State<{ [IK]: IV }>,
 
+    lastOutputChange: any,
     getKey: (Map<IK, IV, OK, OV, D, processor>, key: OK) -> OV,
 }>
 type pairComputer<IK, IV, OK, OV, D> = (
@@ -216,9 +275,11 @@ type pairComputer<IK, IV, OK, OV, D> = (
 ) -> (OK|OV?, OV?)
 type processor<IK, IV, OK, OV> = {
     key: State.State<IK?>, value: State.State<IV>,
-    outPair: Computed.Computed<{ OK|OV }>, syncOutput: State.State,
-    usingValue: IV?, -- usingKey: IK,
-    outKey: OK,
+    outPair: Computed.Computed<{ OK|OV }>,
+    usingKey: IK?, usingValue: IV?,
+
+    listeners: { [any]: (any) -> () },
+    updated: boolean,
 }
 
 --// End
