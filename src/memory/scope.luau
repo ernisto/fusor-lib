@@ -72,8 +72,9 @@ function scope.derivable(root: _scope, ...): _scope
 	return out
 end
 function scope.derive<Fields, Derived>(parent: _scope<{}, Derived>, fields: Fields, ...): _scope<Fields, Derived>
-	local sub = setmetatable(fields or {} :: any, scope.derivable(parent, ...))
-	sub.__index = parent.__index
+	local derived = scope.derivable(parent, ...)
+	local sub = setmetatable(fields or {} :: any, derived)
+	sub.__index = derived.__index
 	sub.timestamp = os.clock()
 	sub.parent = parent.parent
 	sub.depth = parent.depth
@@ -83,8 +84,9 @@ function scope.derive<Fields, Derived>(parent: _scope<{}, Derived>, fields: Fiel
 end
 
 function scope.unhostedChild<Fields, Derived>(parent: _scope<{}, Derived>, fields: Fields, ...): _scope<Fields, Derived>
-	local child = setmetatable(fields or {} :: any, scope.derivable(parent, ...))
-	child.__index = parent.__index
+	local derived = scope.derivable(parent, ...)
+	local child = setmetatable(fields or {} :: any, derived)
+	child.__index = derived.__index
 	child.timestamp = os.clock()
 	child.parent = parent
 	child.depth = parent.depth + 1
