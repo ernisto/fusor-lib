@@ -1,4 +1,5 @@
-local package = if _G._RUNTIME == 'roblox' then script.Parent.Parent:GetFullName() else ''
+local packageDir = require('../packageDir')
+local package = packageDir
 
 --// Consts
 local TRACEBACK_LIMIT = 255
