@@ -1,0 +1,15 @@
+name: ernisto/fusorlib
+version: 0.0.3
+description: state/memory management library inspired by elttob/fusion
+license: MIT
+authors:
+- ernisto
+repository: https://github.com/ernisto/fusor-lib
+exports:
+  lib: src/init
+path_style: !roblox
+  place: {}
+private: false
+realm: shared
+indices:
+  default: https://github.com/daimond113/pesde-index

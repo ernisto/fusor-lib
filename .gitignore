@@ -4,5 +4,5 @@
 # Sourcemap
 /sourcemap.json
 
-# Darklua
-/out
+# Builds
+build/**/out

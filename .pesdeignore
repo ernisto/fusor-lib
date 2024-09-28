@@ -1,0 +1,13 @@
+# settings
+aftman.toml
+stylua.toml
+
+.darklua.json
+.gitignore
+.luaurc
+.vscode
+
+# misc files
+sourcemap.json
+tests
+build
