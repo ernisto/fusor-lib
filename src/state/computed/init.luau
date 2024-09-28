@@ -1,9 +1,9 @@
 --// Packages
-local package = script.Parent.Parent
-local isSimilar = require(package.utils.isSimilar)
-local propagate = require(package.state.propagate)
-local scope = require(package.memory.scope)
-local state = require(package.state)
+local state = require('../init')
+local propagate = require('../propagate')
+local isSimilar = require('../../utils/isSimilar')
+local scope = require('../../memory/scope')
+local warn = require('../../debug/warn')
 
 local Computed = {}
 local update, destroy

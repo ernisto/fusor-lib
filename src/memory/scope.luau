@@ -1,6 +1,5 @@
 --// Packages
-local package = script.Parent.Parent
-local traceback = require(package.debug.traceback)
+local traceback = require('../debug/traceback')
 
 --// Root
 local scope = { depth = 0, parent = nil }

@@ -1,5 +1,4 @@
-local package = script.Parent
-local scope = require(package.memory.scope)
+local scope = require('../memory/scope')
 
 type listeners<Value = any> = { [_State<Value>]: (_State<Value>) -> () }
 

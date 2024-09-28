@@ -1,5 +1,4 @@
-local package = script.Parent.Parent
-local state = require(package.state)
+local state = require('init')
 
 local function outdateAll(self: state.State)
 	self.updated = false

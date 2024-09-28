@@ -1,8 +1,7 @@
-local package = script.Parent.Parent
-local propagate = require(package.state.propagate)
-local scope = require(package.memory.scope)
-local state = require(package.state)
-local isSimilar = require(package.utils.isSimilar)
+local state = require('../init')
+local propagate = require('../propagate')
+local scope = require('../../memory/scope')
+local isSimilar = require('../../utils/isSimilar')
 
 local Value = {}
 

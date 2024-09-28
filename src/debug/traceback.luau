@@ -1,4 +1,4 @@
-local package = script.Parent.Parent
+local package = ""
 
 --// Consts
 local TRACEBACK_LIMIT = 255
@@ -81,7 +81,7 @@ return function(thread: thread?, limit: number?): { stackframe }
 		local frame = if thread then stackframe(thread, level) else stackframe(level)
 		if not frame then break end
 
-		if frame.path:match(package:GetFullName()) then continue end
+		if frame.path:match(package) then continue end
 		table.insert(backtrace, frame)
 	until level > (limit or TRACEBACK_LIMIT)
 

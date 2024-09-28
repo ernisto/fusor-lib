@@ -1,13 +1,13 @@
 --!nolint LocalShadow
 
-local package = script.Parent.Parent.Parent
-local propagate = require(package.state.propagate)
-local Computed = require(package.state.computed)
-local Value = require(package.state.value)
-local Scope = require(package.memory.scope)
-local State = require(package.state)
-local isSimilar = require(package.utils.isSimilar)
-local never = require(package.utils.never)
+local State = require('../../init')
+local propagate = require('../../propagate')
+local Computed = require('../../computed')
+local Value = require('../../value')
+local Scope = require('../../../memory/scope')
+local isSimilar = require('../../../utils/isSimilar')
+local never = require('../../../utils/never')
+local warn = require('../../../debug/warn')
 
 local SAME = newproxy(true)
 
