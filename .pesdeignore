@@ -1,6 +1,8 @@
 # settings
 aftman.toml
 stylua.toml
+wally.toml
+# pesde.yaml
 
 .darklua.json
 .gitignore
