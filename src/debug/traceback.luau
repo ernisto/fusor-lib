@@ -1,17 +1,19 @@
-local package = ""
+local package = if _G._RUNTIME == 'roblox' then script.Parent.Parent:GetFullName() else ''
 
 --// Consts
 local TRACEBACK_LIMIT = 255
 local ALIAS = {
-	['^Server%w+.Packages.Index'] = 'server-packages',
-	['^%w+.Packages.Index'] = 'packages',
+	['^%w+Server%w+%.Packages%.Index'] = 'server-packages',
+	['^%w+%.ServerPackages%.Index'] = 'server-packages',
+	['^%w+%.DevPackages%.Index'] = 'dev-packages',
+	['^%w+%.Packages%.Index'] = 'packages',
 	['^ServerScriptService'] = 'server',
-	['^%w+.Shared'] = 'shared',
-	['^StarterPlayer.StarterCharacterScripts'] = 'character',
-	['^StarterPlayer.StarterPlayerScripts'] = 'client',
-	['^Players.(%w+)'] = 'client(%1)',
-	['^%w+.Client'] = 'client',
-	['cloud_%d+.(%w+)'] = 'plugin.%1',
+	['^%w+%.Shared'] = 'shared',
+	['^StarterPlayer%.StarterCharacterScripts'] = 'character',
+	['^StarterPlayer%.StarterPlayerScripts'] = 'client',
+	['^Players%.(%w+)'] = 'client(%1)',
+	['^%w+%.Client'] = 'client',
+	['cloud_%d+%.(%w+)'] = 'plugin.%1',
 	['^%[C%]'] = 'roblox',
 	-- ["^game.(%w+)"] = "%1",
 }
