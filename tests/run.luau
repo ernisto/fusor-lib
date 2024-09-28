@@ -1,0 +1,1 @@
+require('state/computed/map.spec')()

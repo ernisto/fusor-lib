@@ -1,8 +1,9 @@
-local package = script.Parent.Parent.Parent.Parent
-local Scope = require(package.memory.scope)
-local Map = require(package.state.computed.map)
-local Value = require(package.state.value)
-local Computed = require(package.state.computed)
+local Computed = require('../../../src/state/computed')
+local Map = require('../../../src/state/computed/map')
+local Value = require('../../../src/state/value')
+local Scope = require('../../../src/memory/scope')
+local warn = require('../../../src/debug/warn')
+local task = require('@lune/task')
 
 return function()
 	local test = Scope:unhostedChild({})
