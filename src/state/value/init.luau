@@ -1,4 +1,4 @@
-local state = require('../init')
+local state = require('..')
 local propagate = require('../propagate')
 local scope = require('../../memory/scope')
 local isSimilar = require('../../utils/isSimilar')

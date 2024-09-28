@@ -3,3 +3,6 @@
 
 # Sourcemap
 /sourcemap.json
+
+# Darklua
+/out

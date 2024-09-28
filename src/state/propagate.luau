@@ -1,4 +1,4 @@
-local state = require('init')
+local state = require('./init')
 
 local function outdateAll(self: state.State)
 	self.updated = false

@@ -4,3 +4,4 @@
 # To add a new tool, add an entry to this table.
 [tools]
 stylua = "JohnnyMorganz/stylua@0.20.0"
+darklua = "seaofvoices/darklua@0.13.1"

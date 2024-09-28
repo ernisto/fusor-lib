@@ -1,6 +1,6 @@
 --!nolint LocalShadow
 
-local State = require('../../init')
+local State = require('../..')
 local propagate = require('../../propagate')
 local Computed = require('../../computed')
 local Value = require('../../value')

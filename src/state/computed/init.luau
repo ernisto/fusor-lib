@@ -1,5 +1,5 @@
 --// Packages
-local state = require('../init')
+local state = require('..')
 local propagate = require('../propagate')
 local isSimilar = require('../../utils/isSimilar')
 local scope = require('../../memory/scope')

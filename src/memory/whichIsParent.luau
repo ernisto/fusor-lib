@@ -1,5 +1,5 @@
 local never = require('../utils/never')
-local Scope = require('scope')
+local Scope = require('./scope')
 
 local function whichIsParent<A, B>(shallower: Scope.scope<A>, deeper: Scope.scope<B>): Scope.scope<A | B>?
 	local shallowerDepth = shallower.depth
