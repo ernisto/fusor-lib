@@ -1,6 +1,9 @@
 --// Packages
 local traceback = require('../debug/traceback')
 
+--// Settings
+local TRACEBACK_SCOPES = _G.TRACEBACK_SCOPES
+
 --// Root
 local scope = { depth = 0, parent = nil }
 scope.__cachedMerges = setmetatable({}, { __mode = 'k' })
@@ -74,8 +77,8 @@ function scope.derive<Fields, Derived>(parent: _scope<{}, Derived>, fields: Fiel
 	sub.timestamp = os.clock()
 	sub.parent = parent.parent
 	sub.depth = parent.depth
-	sub.backtrace = traceback()
 
+	if TRACEBACK_SCOPES ~= false then sub.backtrace = traceback() end
 	return sub
 end
 
@@ -85,8 +88,8 @@ function scope.unhostedChild<Fields, Derived>(parent: _scope<{}, Derived>, field
 	child.timestamp = os.clock()
 	child.parent = parent
 	child.depth = parent.depth + 1
-	child.backtrace = traceback()
 
+	if TRACEBACK_SCOPES ~= false then child.backtrace = traceback() end
 	return child
 end
 function scope.child<Fields, Derived>(parent: _scope<{}, Derived>, fields: Fields, ...): _scope<Fields, Derived>
