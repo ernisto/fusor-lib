@@ -25,9 +25,6 @@ local function is(self: unknown): State?
 	return if typeof(self) == 'table' and typeof((self :: any).listeners) == 'table' then self :: State else nil
 end
 local function get<Value>(value: UsedAs<Value>): Value return if is(value) then (value :: any).value else value end
-local function cast<Value>(scope: scope.scope, value: UsedAs<Value>): (State<Value>, 'alreadyIsState'?)
-	if is(value) then return value :: any, 'alreadyIsState' end
-	return scope:child { value = value, listeners = {}, updated = true, get = get } :: any
-end
 
-return { cast = cast, is = is, get = get }
+-- end
+return { is = is, get = get }
