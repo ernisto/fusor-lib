@@ -2,26 +2,17 @@ local scope = require('../memory/scope')
 
 type listeners<Value = any> = { [_State<Value>]: (_State<Value>) -> () }
 
-type maybeDebugHooks = {
-	watchedPriority: _State<number>?,
-	isUpdated: _State<boolean>?,
-	isBusy: _State<boolean>?,
-	name: string?,
-}
 type _State<Value> = {
 	listeners: listeners<Value>,
 	updated: boolean,
 	value: Value,
 
 	get: (_State<Value>) -> Value,
-
-	-- temp bcuz debug hooks
-	set: (_State<Value>, newValue: Value) -> Value,
 }
 
 export type UsedAs<Value = any> = State<Value> | Value
 
-export type State<Value = any, Derived = {}, extra = {}> = scope.scope<Derived, _State<Value> & maybeDebugHooks & extra>
+export type State<Value = any, Derived = {}, extra = {}> = scope.scope<Derived, _State<Value> & extra>
 
 export type ConsumerState<Value = any, Derived = {}, extra = {}> = State<Value, Derived, extra & {
 	listening: { listeners<Value> },

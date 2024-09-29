@@ -2,16 +2,13 @@ local state = require('./init')
 
 local function outdateAll(self: state.State)
 	self.updated = false
-	if self.isUpdated then self.isUpdated:set(false) end
 
-	for state in self.listeners :: any do
+	for state in self.listeners do
 		state.updated = false
-		if state.isUpdated then state.isUpdated:set(false) end
 	end
 end
 local function updateAll(self: state.State)
 	self.updated = true
-	if self.isUpdated then self.isUpdated:set(true) end
 
 	for state, update in self.listeners do
 		update(state)

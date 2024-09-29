@@ -45,9 +45,6 @@ function update<Value, Derived>(self: Computed<Value, Derived>)
 	if self.updated then return end
 
 	self.busy = true
-	do
-		if self.isBusy then self.isBusy:set(true) end
-	end
 
 	for _, listeners in self.listening do
 		listeners[self] = nil
@@ -55,7 +52,6 @@ function update<Value, Derived>(self: Computed<Value, Derived>)
 	local newDepending = table.create(10)
 
 	--// Compute
-	if self.watchedPriority then self.watchedPriority:set(1) end
 	local function use<Consumed>(state: state.UsedAs<Consumed>, possiblyDead: 'possiblyDead'?): Consumed
 		if typeof(state) ~= 'table' then return state end
 
@@ -71,10 +67,6 @@ function update<Value, Derived>(self: Computed<Value, Derived>)
 		if stateListeners[self] ~= update then
 			table.insert(newDepending, stateListeners :: any)
 			stateListeners[self] = update :: any
-
-			if self.watchedPriority and state.watchedPriority then
-				self.watchedPriority:set(math.max(self.watchedPriority.value, 1 + state.watchedPriority.value))
-			end
 		end
 		return value
 	end
@@ -85,9 +77,7 @@ function update<Value, Derived>(self: Computed<Value, Derived>)
 	if not success then
 		computation:destroy()
 		self.busy = false
-		do
-			if self.isBusy then self.isBusy:set(false) end
-		end
+
 		warn(newValue)
 		return self.value
 	end
@@ -99,20 +89,12 @@ function update<Value, Derived>(self: Computed<Value, Derived>)
 	self.listening = newDepending
 	if isSimilar(newValue, self.value) then
 		self.busy = false
-		do
-			if self.isBusy then self.isBusy:set(false) end
-		end
 		return newValue
 	end
 
 	propagate.outdateAll(self)
 	self.value = newValue
-
-	if self.isUpdated then self.isUpdated:set(true) end
 	self.busy = false
-	do
-		if self.isBusy then self.isBusy:set(false) end
-	end
 
 	propagate.updateAll(self)
 	return newValue
