@@ -25,10 +25,13 @@ local builders = Scope:derivable {
 	Computed = Computed,
 	Map = Map,
 }
-return builders:derive {
+return builders:unhostedChild {
 	whichIsParent = whichIsParent,
 	isSimilar = isSimilar,
 	traceback = traceback,
 	never = never,
 	warn = warn,
+
+	isState = state.is,
+	peek = state.get,
 }
