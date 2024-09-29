@@ -71,7 +71,7 @@ function scope.derivable(root: _scope, ...): _scope
 	end
 	return out
 end
-function scope.derive<Fields, Derived>(parent: _scope<{}, Derived>, fields: Fields, ...): _scope<Fields, Derived>
+function scope.derive<Fields, Derived>(parent: _scope<{}, Derived>, fields: Fields, ...): _scope<Derived, Fields>
 	local derived = scope.derivable(parent, ...)
 	local sub = setmetatable(fields or {} :: any, derived)
 	sub.__index = derived.__index
@@ -83,7 +83,7 @@ function scope.derive<Fields, Derived>(parent: _scope<{}, Derived>, fields: Fiel
 	return sub
 end
 
-function scope.unhostedChild<Fields, Derived>(parent: _scope<{}, Derived>, fields: Fields, ...): _scope<Fields, Derived>
+function scope.unhostedChild<Fields, Derived>(parent: _scope<{}, Derived>, fields: Fields, ...): _scope<Derived, Fields>
 	local derived = scope.derivable(parent, ...)
 	local child = setmetatable(fields or {} :: any, derived)
 	child.__index = derived.__index
@@ -94,7 +94,7 @@ function scope.unhostedChild<Fields, Derived>(parent: _scope<{}, Derived>, field
 	if TRACEBACK_SCOPES ~= false then child.backtrace = traceback() end
 	return child
 end
-function scope.child<Fields, Derived>(parent: _scope<{}, Derived>, fields: Fields, ...): _scope<Fields, Derived>
+function scope.child<Fields, Derived>(parent: _scope<{}, Derived>, fields: Fields, ...): _scope<Derived, Fields>
 	return scope.host(parent, scope.unhostedChild(parent, fields, ...))
 end
 
