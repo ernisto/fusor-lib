@@ -12,7 +12,7 @@ local Map = require('./state/computed/map')
 local Scope = require('./memory/scope')
 local whichIsParent = require('./memory/whichIsParent')
 
-export type ValueState<Value = any, Derived = {}> = Value.StateValue<Value, Derived>
+export type ValueState<Value = any, Write = Value, Derived = {}> = Value.StateValue<Value, Write, Derived>
 export type Computed<Value = any, Derived = {}> = Computed.Computed<Value, Derived>
 export type State<Value = any, Derived = {}> = state.State<Value, Derived>
 export type UsedAs<Value = any> = state.UsedAs<Value>
