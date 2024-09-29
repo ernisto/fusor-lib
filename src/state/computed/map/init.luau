@@ -96,9 +96,9 @@ function update<IK, IV, OK, OV>(
 					propagate.outdateAll(valueState :: any)
 					valueState.value = value
 				end
+				unprocessedPairs[usingKey] = nil
 				continue
 			end
-			unprocessedPairs[usingKey] = nil
 		end
 
 		local usingValue = processor.usingValue
@@ -138,6 +138,8 @@ function update<IK, IV, OK, OV>(
 				valueState.value = value
 				propagate.outdateAll(valueState)
 			end
+			processor.outPair.updated = false
+			processor.updated = false
 		else -- create new processor
 			local keyState = Value(self, key)
 			local valueState = Value(self, value)
@@ -240,6 +242,7 @@ function update<IK, IV, OK, OV>(
 	-- clear free processors (happens when more keys has removed over added)
 	for _, freeProcessor in freeProcessors do
 		freeProcessor.key.value = nil
+		freeProcessor.outPair.updated = false
 		freeProcessor.outPair:get()
 	end
 
@@ -281,7 +284,7 @@ type pairComputer<IK, IV, OK, OV, D> = (
 	key: State.State<IK, D>,
 	value: State.State<IV, D>,
 	keepBy: <C>(State.State<C>) -> C
-) -> (OK | OV?, OV?)
+) -> (OK?, OV?)
 type processor<IK, IV, OK, OV> = {
 	key: State.State<IK?>,
 	value: State.State<IV>,
