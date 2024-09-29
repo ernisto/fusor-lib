@@ -113,19 +113,11 @@ type derive =
 	(<C, H>(parent: _scope<H>, C) -> _scope<H, C>)
 	& (<C, H, H1>(parent: _scope<H>, C, H1) -> _scope<H & H1, C>)
 	& (<C, H, H1, H2>(parent: _scope<H>, C, H1, H2) -> _scope<H & H1 & H2, C>)
-	& (<C, H, H1, H2, H3>(parent: _scope<H>, C, H1, H2, H3) -> _scope<H & H1 & H2 & H3, C>)
-	& (<C, H, H1, H2, H3, H4>(parent: _scope<H>, C, H1, H2, H3, H4) -> _scope<H & H1 & H2 & H3 & H4, C>)
-	& (<C, H, H1, H2, H3, H4, H5>(parent: _scope<H>, C, H1, H2, H3, H4, H5) -> _scope<H & H1 & H2 & H3 & H4 & H5, C>)
-	& (<C, H, H1, H2, H3, H4, H5, H6>(
-		parent: _scope<H>,
-		C,
-		H1,
-		H2,
-		H3,
-		H4,
-		H5,
-		H6
-	) -> _scope<H & H1 & H2 & H3 & H4 & H5 & H6, C>)
+
+type derivable =
+	(<H, H1>(parent: _scope<H>, H1) -> _scope<H & H1>)
+	& (<H, H1, H2>(parent: _scope<H>, H1, H2) -> _scope<H & H1 & H2>)
+	& (<H, H1, H2, H3>(parent: _scope<H>, H1, H2, H3) -> _scope<H & H1 & H2 & H3>)
 
 type funcs = {
 	destroy: (self: _scope) -> (),
@@ -135,19 +127,6 @@ type funcs = {
 	child: derive,
 
 	derive: derive,
-	derivable: (<H, H1>(parent: _scope<H>, H1) -> _scope<H & H1>)
-		& (<H, H1, H2>(parent: _scope<H>, H1, H2) -> _scope<H & H1 & H2>)
-		& (<H, H1, H2, H3>(parent: _scope<H>, H1, H2, H3) -> _scope<H & H1 & H2 & H3>)
-		& (<H, H1, H2, H3, H4>(parent: _scope<H>, H1, H2, H3, H4) -> _scope<H & H1 & H2 & H3 & H4>)
-		& (<H, H1, H2, H3, H4, H5>(parent: _scope<H>, H1, H2, H3, H4, H5) -> _scope<H & H1 & H2 & H3 & H4 & H5>)
-		& (<H, H1, H2, H3, H4, H5, H6>(
-			parent: _scope<H>,
-			H1,
-			H2,
-			H3,
-			H4,
-			H5,
-			H6
-		) -> _scope<H & H1 & H2 & H3 & H4 & H5 & H6>),
+	derivable: derivable,
 }
 return table.freeze(scope :: any) :: scope
