@@ -210,21 +210,26 @@ function update<IK, IV, OK, OV>(
 				-- update processors and output
 				local valueChanged = not isSimilar(outValue, lastValue)
 				local keyChanged = not isSimilar(outKey, lastKey)
+				local outputChanged = false
 
 				if keyChanged and lastKey ~= nil and processors[lastKey] == processor then
 					processors[lastKey] = nil
 					output[lastKey] = nil
+					outputChanged = true
 				end
 				if outKey ~= nil then
 					if keyChanged then processors[outKey] = processor end
-					if not keyChanged and not valueChanged then return end
-					output[outKey] = outValue
+					if keyChanged or valueChanged then
+						output[outKey] = outValue
+						outputChanged = true
+					end
 				end
 				lastValue = outValue
 				lastKey = outKey
 				busy = false
 
-				-- update listeners if
+				-- propagate update for Map object if output changed
+				if not outputChanged then return end
 				if self.busy then
 					self.lastOutputChange = updateId
 					return
