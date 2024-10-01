@@ -1,5 +1,5 @@
 name: ernisto/fusorlib
-version: 0.0.8
+version: 0.0.9
 description: state/memory management library inspired by elttob/fusion
 license: MIT
 authors:
