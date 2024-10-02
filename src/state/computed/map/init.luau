@@ -72,14 +72,14 @@ function update<IK, IV, OK, OV>(
 
 	if self.updated then return output end
 	if self.busy then return output end
+	self.outputChanged = false
+	self.updated = false
 	self.busy = true
 
 	local processors = self.processors
 	local freeProcessors = self.freeProcessors
 	local outdatedStates = {} :: { listenable }
 	local pairComputer = self.pairComputer
-
-	local updateId = outdatedStates -- just something that is unique for each `update` callment
 
 	-- update all `processors` that is kept by some key or value
 	-- queue all updates in `outdatedStates` for batched update
@@ -228,10 +228,9 @@ function update<IK, IV, OK, OV>(
 				lastKey = outKey
 				busy = false
 
-				-- propagate update for Map object if output changed
 				if not outputChanged then return end
 				if self.busy then
-					self.lastOutputChange = updateId
+					self.outputChanged = true
 					return
 				end
 				propagate.outdateAll(self)
@@ -259,10 +258,8 @@ function update<IK, IV, OK, OV>(
 	end
 
 	-- end
-	self.updated = true
 	self.busy = false
-
-	if self.lastOutputChange == updateId then
+	if self.outputChanged then
 		propagate.outdateAll(self)
 		propagate.updateAll(self)
 	end
@@ -279,7 +276,7 @@ export type Map<IK = any, IV = any, OK = IK, OV = IV, D = {}, processor = proces
 		processors: { [OK]: processor },
 		subject: State.State<{ [IK]: IV }>,
 
-		lastOutputChange: any,
+		outputChanged: boolean,
 		getKey: (Map<IK, IV, OK, OV, D, processor>, key: OK) -> OV,
 	}
 >
