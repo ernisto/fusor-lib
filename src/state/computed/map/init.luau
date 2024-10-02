@@ -34,7 +34,7 @@ function Map.new<IK, IV, OK, OV, D>(
 		freeProcessors = {},
 		processors = {},
 
-		subject = subjectAsState,
+		subject = subject,
 		pairComputer = pairComputer,
 
 		getKey = Map.getKey,
